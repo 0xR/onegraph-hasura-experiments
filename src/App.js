@@ -1,8 +1,8 @@
 import ApolloClient, { gql } from "apollo-boost";
 import { ApolloProvider, Query } from "react-apollo";
-import OneGraphAuth from "onegraph-auth";
+import OneGraphAuth, { LocalStorage } from "onegraph-auth";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import "./App.css";
 
 const APP_ID = "a3710708-ef73-43dc-8e6c-0dfb7601fb50";
@@ -37,7 +37,8 @@ function App() {
   const oneGraphAuth = useMemo(
     () =>
       new OneGraphAuth({
-        appId: APP_ID
+        appId: APP_ID,
+        storage: new LocalStorage()
       }),
     []
   );
@@ -50,6 +51,27 @@ function App() {
       }),
     [oneGraphAuth]
   );
+
+  async function checkIsLoggedIn() {
+    try {
+      setLoginState("checking");
+      const isLoggedIn = await oneGraphAuth.isLoggedIn("trello");
+      setError(null);
+      if (isLoggedIn) {
+        setLoginState("loggedIn");
+      } else {
+        setLoginState("notLoggedIn");
+      }
+    } catch (e) {
+      setLoginState("error");
+      setError(e);
+    }
+  }
+
+  useEffect(() => {
+    checkIsLoggedIn();
+  }, []);
+
   return (
     <ApolloProvider client={apolloClient}>
       <button
@@ -57,13 +79,7 @@ function App() {
           setLoginState("checking");
           try {
             await oneGraphAuth.login("trello");
-            const isLoggedIn = await oneGraphAuth.isLoggedIn("trello");
-            setError(null);
-            if (isLoggedIn) {
-              setLoginState("loggedIn");
-            } else {
-              setLoginState("notLoggedIn");
-            }
+            await checkIsLoggedIn()
           } catch (e) {
             setLoginState("error");
             setError(e);
