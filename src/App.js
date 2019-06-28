@@ -1,5 +1,5 @@
 import ApolloClient, { gql } from "apollo-boost";
-import { ApolloProvider, Query } from "react-apollo";
+import { ApolloProvider, Query, Mutation } from "react-apollo";
 import OneGraphAuth, { LocalStorage } from "onegraph-auth";
 
 import React, { useState, useMemo, useEffect } from "react";
@@ -60,6 +60,14 @@ const listNpmFavorites = gql`
           }
         }
       }
+    }
+  }
+`;
+
+const addFavoriteMutation = gql`
+  mutation AddFavorite($packageName: String!) {
+    insert_npmFavorites(objects: [{ packageName: $packageName }]) {
+      affected_rows
     }
   }
 `;
@@ -126,6 +134,28 @@ function App() {
       </button>
       <p>{loginState}</p>
       {error && <ShowData data={error} />}
+      <Mutation mutation={addFavoriteMutation}>
+        {(addNpmFavorite, { data }) => (
+          <div>
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                const {
+                  currentTarget: {
+                    packageNameInput,
+                    packageNameInput: { value: newPackageName }
+                  }
+                } = e;
+                addNpmFavorite({ variables: { packageName: newPackageName } });
+                packageNameInput.value = "";
+              }}
+            >
+              <input name="packageNameInput" />
+              <button type="submit">Add Npm package</button>
+            </form>
+          </div>
+        )}
+      </Mutation>
       {loginState === "loggedIn" && (
         <Query query={graphqlQuery}>
           {({ loading, error, data }) => {
