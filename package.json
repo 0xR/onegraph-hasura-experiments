@@ -1,0 +1,41 @@
+{
+  "name": "captions-helper",
+  "homepage": "https://onegraph.github.io/youtube-captions-helper",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "apollo-boost": "^0.4.3",
+    "graphql": "^14.4.0",
+    "onegraph-apollo-client": "^1.2.21",
+    "onegraph-auth": "^1.2.27",
+    "react": "^16.3.2",
+    "react-apollo": "^2.5.8",
+    "react-dom": "^16.3.2",
+    "react-player": "^1.6.1",
+    "react-scripts": "^3.0.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
+  "devDependencies": {
+    "gh-pages": "^2.0.1",
+    "prettier": "^1.18.2"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
