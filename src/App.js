@@ -11,8 +11,22 @@ function ShowData({ data }) {
   return <pre>{JSON.stringify(data, null, 2)}</pre>;
 }
 
-const GetXSDCards = gql`
+const listTrelloQuery = gql`
   query ListCardsPerList {
+    npmFavorites {
+      packageName
+      npm {
+        homepage
+        maintainers {
+          email
+        }
+        downloads {
+          lastMonth {
+            count
+          }
+        }
+      }
+    }
     trello {
       board(id: "z98QYfIa") {
         name
@@ -31,6 +45,28 @@ const GetXSDCards = gql`
   }
 `;
 
+const listNpmFavorites = gql`
+  query {
+    npmFavorites {
+      packageName
+      npm {
+        maintainers {
+          name
+          email
+        }
+        downloads {
+          lastMonth {
+            count
+          }
+        }
+      }
+    }
+  }
+`;
+
+const graphqlQuery = listNpmFavorites;
+// const graphqlQuery = listTrelloQuery;
+
 function App() {
   const [loginState, setLoginState] = useState("initial");
   const [error, setError] = useState(null);
@@ -45,7 +81,7 @@ function App() {
   const apolloClient = useMemo(
     () =>
       new ApolloClient({
-        uri: "https://serve.onegraph.com/dynamic?app_id=" + APP_ID,
+        uri: "http://localhost:8080/v1/graphql",
         request: operation =>
           operation.setContext({ headers: oneGraphAuth.authHeaders() })
       }),
@@ -79,7 +115,7 @@ function App() {
           setLoginState("checking");
           try {
             await oneGraphAuth.login("trello");
-            await checkIsLoggedIn()
+            await checkIsLoggedIn();
           } catch (e) {
             setLoginState("error");
             setError(e);
@@ -91,7 +127,7 @@ function App() {
       <p>{loginState}</p>
       {error && <ShowData data={error} />}
       {loginState === "loggedIn" && (
-        <Query query={GetXSDCards}>
+        <Query query={graphqlQuery}>
           {({ loading, error, data }) => {
             if (loading) return <div>Loading...</div>;
             if (error)
